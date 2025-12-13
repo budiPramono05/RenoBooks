@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class Book extends Model
 {
     use HasFactory;
 
-    // USER → hasMany Orders
-    public function orders()
+    // BOOK → hasMany Orders
+    public function Orders()
     {
         return $this->hasMany(Order::class);
     }
