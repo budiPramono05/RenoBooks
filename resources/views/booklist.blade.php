@@ -230,7 +230,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <!-- Brand Logo -->
-            <a class="navbar-brand" href="/home">RenoBooks</a>
+            <a class="navbar-brand" href="/">RenoBooks</a>
 
             <!-- Navbar Toggle for Small Screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -239,21 +239,50 @@
 
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/booklist">Book List</a>
-                    </li>
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/books">Book List</a>
+                </li>
+
+                @auth
+                    <!-- JIKA SUDAH LOGIN -->
                     <li class="nav-item">
                         <a class="nav-link" href="/orderhistory">Order History</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <span class="nav-link text-warning">
+                            Hi, {{ Auth::user()->name }}
+                        </span>
                     </li>
-                </ul>
-            </div>
+
+                    <li class="nav-item">
+                         <form action="/logout" method="POST" class="d-inline">
+                          @csrf
+                              <button type="submit"
+                                  class="nav-link btn btn-link text-white px-3"
+                                     style="text-decoration: none;">
+                                      Logout
+                                </button>
+                        </form>
+                    </li>
+
+                     @endauth
+
+                     @guest
+                    <!-- JIKA BELUM LOGIN -->
+                      <li class="nav-item">
+                        <a class="nav-link" href="/login">Sign In</a>
+                      </li>
+                    @endguest
+
+            </ul>
+        </div>
         </div>
     </nav>
 
@@ -264,60 +293,51 @@
 
 
 
-    <!-- Search Bar Section -->
-    <section class="search-bar-section">
-        <input type="text" id="search" placeholder="Search for books...">
-    </section>
+<!-- Search Bar Section -->
+<section class="search-bar-section">
+    <form method="GET" action="{{ route('books.list') }}">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search for books..."
+            value="{{ request('search') }}"
+        >
+    </form>
+</section>
 
-    <!-- Book List Section -->
-    <section class="book-list-section">
-        <div class="container">
-            <h2>Book Lists</h2>
-            <p class="text-center">Browse our complete collection of books</p>
-            <div class="book-grid">
-                <!-- Book 1 -->
+<!-- Book List Section -->
+<section class="book-list-section">
+    <div class="container">
+        <h2>Book Lists</h2>
+        <p class="text-center">Browse our complete collection of books</p>
+
+        <div class="book-grid">
+            @forelse ($books as $book)
                 <div class="book-card">
-                    <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Cover 1">
+                    <img
+                        src="{{ $book->cover_image }}"
+                        alt="{{ $book->title }}"
+                        referrerpolicy="no-referrer"
+                    >
+
                     <div class="book-card-body">
-                        <h4>The Midnight Library</h4>
-                        <p>Matt Haig</p>
-                        <p>$24.99</p>
-                        <a href="/bookdetail" class="btn">Detail</a>
+                        <h4>{{ $book->title }}</h4>
+                        <p>{{ $book->author }}</p>
+                        <p>Rp {{ number_format($book->price, 0, ',', '.') }}</p>
+
+                        <a href="{{ route('books.detail', $book->id) }}" class="btn">
+                            Detail
+                        </a>
                     </div>
                 </div>
-                <!-- Book 2 -->
-                <div class="book-card">
-                    <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Cover 2">
-                    <div class="book-card-body">
-                        <h4>Atomic Habits</h4>
-                        <p>James Clear</p>
-                        <p>$19.99</p>
-                        <a href="/bookdetail" class="btn">Detail</a>
-                    </div>
-                </div>
-                <!-- Book 3 -->
-                <div class="book-card">
-                    <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Cover 3">
-                    <div class="book-card-body">
-                        <h4>The Silent Patient</h4>
-                        <p>Alex Michaelides</p>
-                        <p>$22.50</p>
-                        <a href="/bookdetail" class="btn">Detail</a>
-                    </div>
-                </div>
-                <!-- Book 4 -->
-                <div class="book-card">
-                    <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Cover 4">
-                    <div class="book-card-body">
-                        <h4>Educated</h4>
-                        <p>Tara Westover</p>
-                        <p>$18.99</p>
-                        <a href="/bookdetail" class="btn">Detail</a>
-                    </div>
-                </div>
-            </div>
+            @empty
+                <p class="text-center">No books found.</p>
+            @endforelse
         </div>
-    </section>
+    </div>
+</section>
+
+
 
 
 

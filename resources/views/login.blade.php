@@ -183,7 +183,7 @@ body {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <!-- Brand Logo -->
-            <a class="navbar-brand" href="/home">RenoBooks</a>
+            <a class="navbar-brand" href="/">RenoBooks</a>
 
             <!-- Navbar Toggle for Small Screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -204,21 +204,47 @@ body {
                 Login
             </div>
             <p class="text-center" style="font-size: 18px; color: #6c757d;">Sign in to continue shopping</p>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" class="form-control" placeholder="Email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Password" required>
-                </div>
-                <div class="error-message" id="errorMessage">Invalid email or password</div>
-                <button type="submit" class="btn btn-primary">Sign In</button>
-            </form>
-            <div class="link">
-                <p>Don't have an account? <a href="/register">Sign up</a></p>
+            <form method="POST" action="{{ route('login.process') }}">
+    @csrf
+
+    <div class="form-group">
+        <label>Email</label>
+        <input 
+            type="email" 
+            name="email" 
+            class="form-control @error('email') is-invalid @enderror"
+            value="{{ old('email') }}"
+            placeholder="Email"
+            required
+        >
+
+        @error('email')
+            <div class="invalid-feedback">
+                {{ $message }}
             </div>
+        @enderror
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input 
+            type="password" 
+            name="password" 
+            class="form-control"
+            placeholder="Password"
+            required
+        >
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Sign In
+    </button>
+</form>
+
+<div class="link">
+    <p>Don't have an account? <a href="{{ route('register') }}">Sign up</a></p>
+</div>
+
         </div>
     </div>
 

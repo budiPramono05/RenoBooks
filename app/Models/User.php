@@ -9,6 +9,21 @@ class User extends Authenticatable
 {
     use HasFactory;
 
+    protected $fillable = [
+    'name',
+    'email',
+    'password',
+    'alamat',
+    'no_telp',
+    'role',
+    ];
+
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     // USER → hasMany Orders
     public function orders()
     {

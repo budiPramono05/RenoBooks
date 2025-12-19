@@ -259,7 +259,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <!-- Brand Logo -->
-            <a class="navbar-brand" href="/home">RenoBooks</a>
+            <a class="navbar-brand" href="/">RenoBooks</a>
 
             <!-- Navbar Toggle for Small Screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -268,21 +268,50 @@
 
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/booklist">Book List</a>
-                    </li>
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/books">Book List</a>
+                </li>
+
+                @auth
+                    <!-- JIKA SUDAH LOGIN -->
                     <li class="nav-item">
                         <a class="nav-link" href="/orderhistory">Order History</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <span class="nav-link text-warning">
+                            Hi, {{ Auth::user()->name }}
+                        </span>
                     </li>
-                </ul>
-            </div>
+
+                    <li class="nav-item">
+                         <form action="/logout" method="POST" class="d-inline">
+                          @csrf
+                              <button type="submit"
+                                  class="nav-link btn btn-link text-white px-3"
+                                     style="text-decoration: none;">
+                                      Logout
+                                </button>
+                        </form>
+                    </li>
+
+                     @endauth
+
+                     @guest
+                    <!-- JIKA BELUM LOGIN -->
+                      <li class="nav-item">
+                        <a class="nav-link" href="/login">Sign In</a>
+                      </li>
+                    @endguest
+
+            </ul>
+        </div>
         </div>
     </nav>
 
@@ -298,45 +327,48 @@
 
         <!-- Book Information -->
         <div class="row">
-            <div class="col-md-7 book-info">
-                <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Cover">
-                <div class="book-details">
-                    <p><strong>Judul:</strong> Atomic Habits</p>
-                    <p><strong>Penulis:</strong> James Clear</p>
-                    <p><strong>Harga per buku:</strong> $19.99</p>
-                    <div class="form-group">
-                        <label for="quantity">Quantity:</label>
-                        <div class="quantity-control">
-                            <input type="number" id="quantity" value="1" min="1" onchange="updateTotalPrice()">
-                        </div>
-                    </div>
-                    <p><strong>Total Harga:</strong> $19.99</p>
-                </div>
-            </div>
+            @foreach($cart as $item)
+<div class="col-md-7 book-info mb-3">
+    <img 
+    src="{{ $item['cover'] }}" 
+    alt="{{ $item['title'] }}"
+    referrerpolicy="no-referrer"
+    class="img-fluid rounded"
+    style="max-width:120px"
+>
+    <div class="book-details">
+        <p><strong>Judul:</strong> {{ $item['title'] }}</p>
+        <p><strong>Penulis:</strong> {{ $item['author'] }}</p>
+        <p><strong>Harga:</strong> Rp {{ number_format($item['price']) }}</p>
+        <p><strong>Qty:</strong> {{ $item['qty'] }}</p>
+        <p><strong>Total:</strong>
+            Rp {{ number_format($item['price'] * $item['qty']) }}
+        </p>
+    </div>
+</div>
+@endforeach
 
             <!-- Order Summary -->
             <div class="col-md-4 order-summary">
                 <h4>Ringkasan Pesanan</h4>
                 <table>
-                    <tr>
-                        <td><strong>Subtotal (1 buku)</strong></td>
-                        <td>$19.99</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Ongkos Kirim</strong></td>
-                        <td>$4.99</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Pajak (10%)</strong></td>
-                        <td>$2.00</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Total</strong></td>
-                        <td>$26.98</td>
-                    </tr>
-                </table>
-                <button class="btn btn-primary btn-custom">Konfirmasi Pesanan</button>
-                <button class="btn btn-secondary btn-custom" onclick="window.history.back();">Kembali</button>
+    <tr>
+        <td>Subtotal</td>
+        <td>Rp {{ number_format($total) }}</td>
+    </tr>
+    <tr>
+        <td><strong>Total</strong></td>
+        <td><strong>Rp {{ number_format($total) }}</strong></td>
+    </tr>
+</table>
+
+<form action="{{ route('order.store') }}" method="POST">
+    @csrf
+    <button class="btn btn-primary btn-custom">
+        Konfirmasi Pesanan
+    </button>
+</form>
+
             </div>
         </div>
 

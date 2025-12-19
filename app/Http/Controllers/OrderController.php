@@ -2,64 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\order;
-use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\Book;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
-    }
+        // Ambil order user yang sedang login
+        $orders = Order::with('book')
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(function ($order) {
+                // grouping berdasarkan tanggal order (atau bisa grouping manual)
+                return $order->created_at->format('Y-m-d H:i:s');
+            });
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return view('orderhistory', compact('orders'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    
+    public function store()
     {
-        //
-    }
+        $cart = session()->get('cart');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(order $order)
-    {
-        //
-    }
+        if (!$cart) {
+            return redirect('/booklist');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(order $order)
-    {
-        //
-    }
+        foreach ($cart as $item) {
+            Order::create([
+                'user_id'     => Auth::id(),
+                'book_id'     => $item['book_id'],
+                'qty'         => $item['qty'],
+                'total_price' => $item['price'] * $item['qty'],
+                'status'      => 'pending'
+            ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, order $order)
-    {
-        //
-    }
+            Book::where('id', $item['book_id'])
+                ->decrement('stock', $item['qty']);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(order $order)
-    {
-        //
+        session()->forget(['cart', 'cart_total']);
+
+        return redirect('/orderhistory');
     }
 }

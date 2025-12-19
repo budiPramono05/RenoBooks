@@ -252,7 +252,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <!-- Brand Logo -->
-            <a class="navbar-brand" href="/home">RenoBooks</a>
+            <a class="navbar-brand" href="/">RenoBooks</a>
 
             <!-- Navbar Toggle for Small Screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -261,21 +261,50 @@
 
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/booklist">Book List</a>
-                    </li>
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/books">Book List</a>
+                </li>
+
+                @auth
+                    <!-- JIKA SUDAH LOGIN -->
                     <li class="nav-item">
                         <a class="nav-link" href="/orderhistory">Order History</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <span class="nav-link text-warning">
+                            Hi, {{ Auth::user()->name }}
+                        </span>
                     </li>
-                </ul>
-            </div>
+
+                    <li class="nav-item">
+                         <form action="/logout" method="POST" class="d-inline">
+                          @csrf
+                              <button type="submit"
+                                  class="nav-link btn btn-link text-white px-3"
+                                     style="text-decoration: none;">
+                                      Logout
+                                </button>
+                        </form>
+                    </li>
+
+                     @endauth
+
+                     @guest
+                    <!-- JIKA BELUM LOGIN -->
+                      <li class="nav-item">
+                        <a class="nav-link" href="/login">Sign In</a>
+                      </li>
+                    @endguest
+
+            </ul>
+        </div>
         </div>
     </nav>
 
@@ -287,62 +316,46 @@
 <div><h1 class="order-title">Order History</h1></div>
 
    <div class="order-history">
-            <!-- Order 1 -->
-            <div class="order-card">
-                <div class="order-id">ORD-001</div>
-                <div class="status delivered">Delivered</div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="order-details">
-                            <p><strong>The Midnight Library</strong> × 1</p>
-                            <p><strong>Atomic Habits</strong> × 1</p>
-                        </div>
-                        <div class="order-date">1/15/2024</div>
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <div class="order-price">$45.98</div>
-                        <a href="/bookdetail" class="btn-detail">Detail</a>
-                    </div>
+
+@forelse ($orders as $orderGroup)
+    <div class="order-card">
+        <div class="order-id">
+            ORD-{{ $orderGroup->first()->id }}
+        </div>
+
+        <div class="status {{ $orderGroup->first()->status }}">
+            {{ ucfirst($orderGroup->first()->status) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="order-details">
+                    @foreach ($orderGroup as $order)
+                        <p>
+                            <strong>{{ $order->book->title }}</strong>
+                            × {{ $order->qty }}
+                        </p>
+                    @endforeach
+                </div>
+
+                <div class="order-date">
+                    {{ $orderGroup->first()->created_at->format('d M Y') }}
                 </div>
             </div>
 
-            <!-- Order 2 -->
-            <div class="order-card">
-                <div class="order-id">ORD-002</div>
-                <div class="status in-transit">In Transit</div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="order-details">
-                            <p><strong>The Silent Patient</strong> × 1</p>
-                        </div>
-                        <div class="order-date">1/20/2024</div>
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <div class="order-price">$22.50</div>
-                        <a href="/bookdetail" class="btn-detail">Detail</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order 3 -->
-            <div class="order-card">
-                <div class="order-id">ORD-003</div>
-                <div class="status pending">Pending</div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="order-details">
-                            <p><strong>Where the Crawdads Sing</strong> × 2</p>
-                        </div>
-                        <div class="order-date">2/5/2024</div>
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <div class="order-price">$39.98</div>
-                        <a href="/bookdetail" class="btn-detail">Detail</a>
-                    </div>
+            <div class="col-md-4 text-end">
+                <div class="order-price">
+                    Rp {{ number_format($orderGroup->sum('total_price'), 0, ',', '.') }}
                 </div>
             </div>
         </div>
     </div>
+@empty
+    <p class="text-center text-muted">No order history yet.</p>
+@endforelse
+
+</div>
+
 
     <!-- Footer Section -->
     <footer>

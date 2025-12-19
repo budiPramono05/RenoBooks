@@ -255,7 +255,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
             <!-- Brand Logo -->
-            <a class="navbar-brand" href="/home">RenoBooks</a>
+            <a class="navbar-brand" href="/">RenoBooks</a>
 
             <!-- Navbar Toggle for Small Screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -264,21 +264,50 @@
 
             <!-- Navbar Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/booklist">Book List</a>
-                    </li>
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/books">Book List</a>
+                </li>
+
+                @auth
+                    <!-- JIKA SUDAH LOGIN -->
                     <li class="nav-item">
                         <a class="nav-link" href="/orderhistory">Order History</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                        <span class="nav-link text-warning">
+                            Hi, {{ Auth::user()->name }}
+                        </span>
                     </li>
-                </ul>
-            </div>
+
+                    <li class="nav-item">
+                         <form action="/logout" method="POST" class="d-inline">
+                          @csrf
+                              <button type="submit"
+                                  class="nav-link btn btn-link text-white px-3"
+                                     style="text-decoration: none;">
+                                      Logout
+                                </button>
+                        </form>
+                    </li>
+
+                     @endauth
+
+                     @guest
+                    <!-- JIKA BELUM LOGIN -->
+                      <li class="nav-item">
+                        <a class="nav-link" href="/login">Sign In</a>
+                      </li>
+                    @endguest
+
+            </ul>
+        </div>
         </div>
     </nav>
 
@@ -291,47 +320,78 @@
 <section class="cart-summary">
     <div class="container">
         <div class="cart-items">
-            <span>Items in Cart: <span id="cart-item-count">0</span></span>
-            <span>Total: $<span id="cart-total">0.00</span></span>
+            <span>Items in Cart: {{ session('cart') ? count(session('cart')) : 0 }}</span>
+            <span>
+                Total: Rp {{ number_format(session('cart_total', 0), 0, ',', '.') }}
+            </span>
         </div>
     </div>
-    <!-- Checkout Button on the side -->
-    <a href="/checkout" class="btn checkout-btn">Checkout</a>
+
+    <a href="{{ route('checkout') }}" class="btn checkout-btn">Checkout</a>
 </section>
 
+<!-- Book Detail Section -->
+<section class="book-detail-section">
+    <div class="container">
+        <h2>Book Detail</h2>
 
-    <!-- Book Detail Section -->
-    <section class="book-detail-section">
-        <div class="container">
-            <h2>Book Detail</h2>
-            <div class="book-info">
-                <!-- Book Image -->
-                <div class="book-image">
-                <img src="{{asset('IMG/BookCover.jpg')}}" alt="Book Image">
-                </div>
+        <div class="book-info">
+            <!-- Book Image -->
+            <div class="book-image">
+                <img 
+                    src="{{ $book->cover_image }}"
+                        alt="{{ $book->title }}"
+                        referrerpolicy="no-referrer"
+                >
+            </div>
 
-                <!-- Book Details -->
-                <div class="book-details">
-                    <h3>The Alchemist</h3>
-                    <p>by Paulo Coelho</p>
-                    <p class="description">A magical story about following your dreams. Paulo Coelho's masterpiece tells the mystical story of Santiago.</p>
-                    <p class="price">$16.99</p>
+            <!-- Book Details -->
+            <div class="book-details">
+                <h3>{{ $book->title }}</h3>
+                <p>by {{ $book->author }}</p>
 
-                    <!-- Quantity and Stock Section -->
+                <p class="description">
+                    {{ $book->desc }}
+                </p>
+
+                <p class="price">
+                    Rp {{ number_format($book->price, 0, ',', '.') }}
+                </p>
+
+                <!-- Quantity and Stock -->
+                <form method="POST" action="{{ route('cart.add', $book->id) }}">
+                    @csrf
+
                     <div class="quantity-section">
                         <label for="quantity">Quantity:</label>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" onchange="updateCart()">
-                        <p class="stock">Stock Available: 50</p>
+                        <input 
+                            type="number" 
+                            name="qty" 
+                            value="1" 
+                            min="1" 
+                            max="{{ $book->stock }}"
+                        >
+
+                        <p class="stock">
+                            Stock Available: {{ $book->stock }}
+                        </p>
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="#" class="btn" onclick="addToCart()">Add to Cart</a>
-                        <a href="/booklist" class="back-btn">Back to Books</a>
+                        <button type="submit" class="btn">
+                            Add to Cart
+                        </button>
+
+                        <a href="{{ route('books.list') }}" class="back-btn">
+                            Back to Books
+                        </a>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
 
 
     <!-- Footer Section -->
